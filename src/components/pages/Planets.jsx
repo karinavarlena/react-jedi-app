@@ -52,11 +52,7 @@ function Planets() {
     }
 
     const getColumnNames = () => {
-        if (!planets.length) {
-            return ["planets", "rotation_period", "orbital_period", "diameter", "name", "delete"]
-        }
-
-        return Object.keys(planets[0])
+        return ["id", "rotation_period", "orbital_period", "diameter"]
     }
 
     return (

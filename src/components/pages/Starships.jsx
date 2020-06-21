@@ -51,11 +51,7 @@ function Starships() {
     }
 
     const getColumnNames = () => {
-        if (!starships.length) {
-            return []
-        }
-
-        return Object.keys(starships[0])
+        return ["id", "model", "manufacturer", "crew"]
     }
 
     return (

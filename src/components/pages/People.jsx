@@ -52,11 +52,7 @@ function People() {
     }
 
     const getColumnNames = () => {
-        if (!people.length) {
-            return ["name", "height", "mass", "gender", "birth_year"]
-        }
-
-        return Object.keys(people[0])
+        return ["id", "height", "mass", "gender", "birth_year"]
     }
 
     return (
