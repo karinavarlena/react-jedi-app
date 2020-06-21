@@ -4,24 +4,23 @@ import Form from '../common/Form';
 import NoMatch from '../common/NoMatch';
 import { Switch, Route, Link, useRouteMatch, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
-import  { getPeople } from "../../services/swApiService";
+import  { getPeople, updateLocalStorage } from "../../services/swApiService";
 
 
 function People() {
-    const [people, setPeople] = useState([]);
+    const [people, setPeopleState] = useState([]);
     const { path } = useRouteMatch();    
     const history = useHistory();
     
+    const setPeople = (data) => {
+        setPeopleState(data);
+        updateLocalStorage('people', data); 
+    }
+
     useEffect(() => {
         const getData = async () => {
             const data = await getPeople()
-            const idField = Object.keys(data[0])[0];
-            let peopleData = data.map(elem => {
-                elem.id = elem[idField];
-                delete elem[idField]; 
-                return elem;
-            })
-            setPeople(peopleData)
+            setPeople(data)
         }
         getData()
     }, [])

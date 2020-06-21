@@ -4,24 +4,23 @@ import Form from '../common/Form';
 import NoMatch from '../common/NoMatch';
 import { Switch, Route, Link, useRouteMatch, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
-import  { getPlanets } from "../../services/swApiService";
+import  { getPlanets, updateLocalStorage } from "../../services/swApiService";
 
 
 function Planets() {
-    const [planets, setPlanets] = useState([]);
+    const [planets, setplanetsState] = useState([]);
     const { path } = useRouteMatch();    
     const history = useHistory();
     
+    const setPlanets = (data) => {
+        setplanetsState(data);
+        updateLocalStorage('planets', data); 
+    }
+
     useEffect(() => {
         const getData = async () => {
             const data = await getPlanets()
-            const idField = Object.keys(data[0])[0];
-            let planetsData = data.map(elem => {
-                elem.id = elem[idField];
-                delete elem[idField]; 
-                return elem;
-            })
-            setPlanets(planetsData)
+            setPlanets(data)
         }
         getData()
     }, [])

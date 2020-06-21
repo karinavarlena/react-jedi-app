@@ -4,34 +4,22 @@ import Form from '../common/Form';
 import NoMatch from '../common/NoMatch';
 import { Switch, Route, Link, useRouteMatch, useHistory } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.css';
-import  { getStarships } from "../../services/swApiService";
-
-const data = [
-    {starship: 'X-20 Dyna Soar', state: 'project not implemented'},
-    {starship: 'Spiral', state: 'project not implemented'},
-    {starship: 'LKS',  state: 'project not implemented'},
-    {starship: 'Space Shuttle', state: '135 flights'},
-    {starship: 'X-30 NASP', state: 'project suspended'},
-    {starship: 'VentureStar', state: 'project suspended'},
-    {starship: 'ROTON', state: 'project suspended'},
-    {starship: 'Delta Clipper', state: 'opened'},
-]
+import  { getStarships, updateLocalStorage } from "../../services/swApiService";
 
 function Starships() {
-    const [starships, setStarships] = useState(data);
+    const [starships, setStarshipsState] = useState([]);
     const { path } = useRouteMatch();    
     const history = useHistory();
+
+    const setStarships = (data) => {
+        setStarshipsState(data);
+        updateLocalStorage('starships', data); 
+    }
 
     useEffect(() => {
         const getData = async () => {
             const data = await getStarships()
-            const idField = Object.keys(data[0])[0];
-            let starshipsData = data.map(elem => {
-                elem.id = elem[idField];
-                delete elem[idField]; 
-                return elem;
-            })
-            setStarships(starshipsData)
+            setStarships(data)
         }
         getData()
     }, [])
