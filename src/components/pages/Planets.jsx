@@ -1,29 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Table from "../common/Table";
 import Form from '../common/Form';
 import NoMatch from '../common/NoMatch';
 import { Switch, Route, Link, useRouteMatch, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
-import  { getPlanets, updateLocalStorage } from "../../services/swApiService";
 
 
-function Planets() {
-    const [planets, setplanetsState] = useState([]);
+function Planets({planets, setPlanets}) {
     const { path } = useRouteMatch();    
     const history = useHistory();
-    
-    const setPlanets = (data) => {
-        setplanetsState(data);
-        updateLocalStorage('planets', data); 
-    }
-
-    useEffect(() => {
-        const getData = async () => {
-            const data = await getPlanets()
-            setPlanets(data)
-        }
-        getData()
-    }, [])
 
     const handleAppPlanets = (planetData) => {
         const data = [...planets, planetData];
@@ -38,21 +23,17 @@ function Planets() {
     }
 
     const handleDeletePlanets = (planetData) => {
-        const data = planets.filter(planet => JSON.stringify(planet) !== JSON.stringify(planetData));
+        const data = planets.filter(planet => planet.id !== planetData.id);
         setPlanets(data);
     }
 
     const getInitialPlanetsData = () => {
-        return planets.length>0 ?
-            Object.keys(planets[0]).reduce((cols, columnName) => {
-                cols[columnName] = "";
-                return cols;
-            }, {}):
-            []
+        return getColumnNames().reduce((cols, columnName) => ({ ...cols,[columnName]: ""}), {})
     }
 
+
     const getColumnNames = () => {
-        return ["id", "rotation_period", "orbital_period", "diameter"]
+        return ["name", "rotation_period", "orbital_period", "diameter"]
     }
 
     return (
@@ -82,9 +63,6 @@ function Planets() {
                     columns={getColumnNames()}
                     handleData={handleAppPlanets}
                 />
-            </Route>
-            <Route path={`${path}/*`}>
-                <NoMatch />
             </Route>
         </Switch>
     );

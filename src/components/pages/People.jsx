@@ -4,26 +4,12 @@ import Form from '../common/Form';
 import NoMatch from '../common/NoMatch';
 import { Switch, Route, Link, useRouteMatch, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
-import  { getPeople, updateLocalStorage } from "../../services/swApiService";
 
 
-function People() {
-    const [people, setPeopleState] = useState([]);
+function People({people, setPeople}) {
     const { path } = useRouteMatch();    
     const history = useHistory();
     
-    const setPeople = (data) => {
-        setPeopleState(data);
-        updateLocalStorage('people', data); 
-    }
-
-    useEffect(() => {
-        const getData = async () => {
-            const data = await getPeople()
-            setPeople(data)
-        }
-        getData()
-    }, [])
 
     const handleAppPerson = (personData) => {
         const data = [...people, personData];
@@ -38,21 +24,16 @@ function People() {
     }
 
     const handleDeletePerson = (personData) => {
-        const data = people.filter(person => JSON.stringify(person) !== JSON.stringify(personData));
+        const data = people.filter(person => person.id !== personData.id);
         setPeople(data);
     }
 
     const getInitialPeopleData = () => {
-        return people.length>0 ?
-            Object.keys(people[0]).reduce((cols, columnName) => {
-                cols[columnName] = "";
-                return cols;
-            }, {}):
-            []
+        return getColumnNames().reduce((cols, columnName) => ({ ...cols,[columnName]: ""}), {})
     }
 
     const getColumnNames = () => {
-        return ["id", "height", "mass", "gender", "birth_year"]
+        return ["name", "height", "mass", "gender", "birth_year"]
     }
 
     return (
@@ -82,9 +63,6 @@ function People() {
                     columns={getColumnNames()}
                     handleData={handleAppPerson}
                 />
-            </Route>
-            <Route path={`${path}/*`}>
-                <NoMatch />
             </Route>
         </Switch>
     );

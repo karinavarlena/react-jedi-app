@@ -1,36 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Input from "./Input";
 import Button from "./Button";
-import { withRouter } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Joi from '@hapi/joi';
+import { nanoid } from "nanoid";
 
-class Form extends React.Component {
-    constructor(props) {
-        super(props);
-        
-        const { initialData, columns, match } = this.props;
-        const {id} = match.params;
-        
-        this.state = {
-            columns,
-            initialData,
-            personData: initialData.length>0? initialData.find(person => person.id === id): initialData,
-            error: columns.reduce((res, col) =>({...res, ...{[col]: ''}}), {})
-        }
-    }
-    static getDerivedStateFromProps(props, state){
-        if(JSON.stringify(props.initialData) !== JSON.stringify(state.initialData)) {
-            
-            const { initialData } = props;
-            const data = initialData.length>0? initialData.find(person => person.id === props.match.params.id): initialData;
 
-            return { ...state, ...{initialData, personData: data}};
-        }
-        return null;
-    }
-    
-    rules = {
-        id: Joi.string().min(3).max(30).required(),
+const Form = ({columns, initialData, handleData}) => {
+    const { id } = useParams();
+    const [personData, setPersonData] = useState(initialData);
+    const [errors, setErrors] = useState(Object.keys(personData).reduce((res, key)=>({...res, [key]:''}), {}));
+
+    const rules = {
+        id: Joi.required(),
+        name: Joi.string().min(3).max(30).required(),
         height: Joi.number().integer().min(1).max(1000).required(),
         mass: Joi.number().integer().min(1).max(1000).required(),
         gender: Joi.string().alphanum().min(3).max(30).required(),
@@ -43,71 +26,67 @@ class Form extends React.Component {
         crew: Joi.string().required()
     };
 
-    
-    handleClick = (event) => {
-        event.preventDefault();
-        const hasError = this.checkAllValidation()
-        !hasError && this.props.handleData(this.state.personData, this.props.match.params.id);
-    }
+    useEffect(() => {
+        const currentPerson = initialData.length>0? initialData.find(person => person.id === id): initialData;
+        setPersonData(currentPerson)   
+    }, [id, initialData]);
 
-    handleChange = (event) => {
-        const { currentTarget : input } = event;
-        const data = {...this.state.personData};
-        data[input.name] = input.value;   
-        this.setState({personData: data})
-    }
-
-    handleBlur = (event) => {
-        const { currentTarget : input } = event;
-        
-        const schema = Joi.object({[input.name]: this.rules[input.name]});
-        const validation = schema.validate({[input.name]: input.value});
-        
-        const errorMessage = validation.error? validation.error.details[0].message: '';
-        const error = {...this.state.error, ...{[input.name]: errorMessage}}
-        
-        this.setState({error})
-    }
-
-    checkAllValidation = () => {
-        let { error } = this.state;
+    const checkAllValidation = () => {
+        let errorsCopy = {...errors};
         let hasError = false;
 
-        Object.keys(this.state.personData).forEach(key => {
-            const schema = Joi.object({[key]: this.rules[key]});
-            const validation = schema.validate({[key]: this.state.personData[key]});
+        Object.keys(personData).forEach(key => {
+            const schema = Joi.object({[key]: rules[key]});
+            const validation = schema.validate({[key]: personData[key]});
             const errorMessage = validation.error? validation.error.details[0].message: '';
-            error = {...error, ...{[key]: errorMessage}};
+            errorsCopy[key] = errorMessage;
             hasError = hasError || errorMessage.length>0;
         })
 
-        this.setState({error});
+        setErrors(errorsCopy);
         return hasError;
     }
 
-    render() {
-        return (
-            <form className="col-md-8 mx-auto">
-                {this.state.columns.map(columnName => (
-                    <Input
-                    key={columnName}
-                    name={columnName}
-                    label={columnName}
-                    value={this.state.personData[columnName]}
-                    type="input"
-                    onChange={this.handleChange}
-                    onBlur={this.handleBlur}
-                    error={this.state.error[columnName]}
-                    />  
-                ))}
-                <Button
-                    label="Save"
-                    classes="btn btn-secondary my-2"
-                    onClick={this.handleClick}
+    const handleClick = (event) => {
+        event.preventDefault();
+        const data = {...personData, id: nanoid()};
+        const hasError = checkAllValidation()
+        !hasError && handleData(data, id);
+    }
+
+    const handleChange = (event) => {
+        const { currentTarget : input } = event;
+        const data = {...personData};
+        data[input.name] = input.value;
+        setPersonData(data)
+
+        const schema = Joi.object({[input.name]: rules[input.name]});
+        const validation = schema.validate({[input.name]: input.value});
+        const errorMessage = validation.error? validation.error.details[0].message: '';
+        const error = {...errors, [input.name]: errorMessage};
+        setErrors(error)
+    }
+
+    return (
+        <form>
+            {columns.map(columnName => (
+                <Input
+                key={columnName}
+                name={columnName}
+                label={columnName}
+                value={personData[columnName]}
+                type="input"
+                onChange={handleChange}
+                error={errors[columnName]}
                 />
-            </form>
-        );
-    };
+            ))}
+            <Button
+                label="Save"
+                classes="btn btn-secondary my-2"
+                onClick={handleClick}
+            />
+        </form>
+    );
 };
 
-export default withRouter(Form);
+export default Form;

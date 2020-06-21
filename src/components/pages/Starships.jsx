@@ -1,28 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Table from "../common/Table";
 import Form from '../common/Form';
 import NoMatch from '../common/NoMatch';
 import { Switch, Route, Link, useRouteMatch, useHistory } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.css';
-import  { getStarships, updateLocalStorage } from "../../services/swApiService";
 
-function Starships() {
-    const [starships, setStarshipsState] = useState([]);
+function Starships({starships, setStarships}) {
     const { path } = useRouteMatch();    
     const history = useHistory();
-
-    const setStarships = (data) => {
-        setStarshipsState(data);
-        updateLocalStorage('starships', data); 
-    }
-
-    useEffect(() => {
-        const getData = async () => {
-            const data = await getStarships()
-            setStarships(data)
-        }
-        getData()
-    }, [])
 
     const handleAdd = (personData) => {
         const data = [...starships, personData];
@@ -31,27 +16,22 @@ function Starships() {
     }
 
     const handleChange = (starshipData, id) => {
-        const data = starships.map(planet => planet.id === id? starshipData: planet);
+        const data = starships.map(starship => starship.id === id? starshipData: starship);
         setStarships(data);
         history.push(path);
     }
 
     const handleDelete = (personData) => {
-        const data = starships.filter(({starship}) => starship !== personData.starship);
+        const data = starships.filter(starship => starship.id !== personData.id);
         setStarships(data);
     }
 
     const getInitialStarshipsData = () => {
-        return starships.length>0 ?
-        Object.keys(starships[0]).reduce((cols, columnName) => {
-            cols[columnName] = "";
-            return cols;
-        }, {}):
-        []
+        return getColumnNames().reduce((cols, columnName) => ({ ...cols,[columnName]: ""}), {})
     }
 
     const getColumnNames = () => {
-        return ["id", "model", "manufacturer", "crew"]
+        return ["name", "model", "manufacturer", "crew"]
     }
 
     return (

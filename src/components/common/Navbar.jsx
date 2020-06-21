@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, withRouter } from "react-router-dom";
 
-function Navigation({ location }) {
+function Navbar({ location }) {
     
     return (
         <nav id="sidebar" className="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
@@ -20,4 +20,4 @@ function Navigation({ location }) {
     );
 }
 
-export default withRouter(Navigation);
+export default withRouter(Navbar);
