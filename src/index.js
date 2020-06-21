@@ -4,7 +4,7 @@ import 'normalize.css';
 import 'sanitize.css';
 import 'sanitize.css/forms.css';
 import 'sanitize.css/typography.css';
-import App from './App';
+import App from './App.jsx';
 
 ReactDOM.render(
   <React.StrictMode>
