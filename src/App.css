@@ -1,0 +1,12 @@
+table a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+table a:hover, table a:focus, table a:active {
+  color: #cccccc;
+}
+
+tbody tr>td:last-child {
+  width: 100px;
+}
